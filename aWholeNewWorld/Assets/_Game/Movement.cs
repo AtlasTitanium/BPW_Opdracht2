@@ -10,9 +10,10 @@ public class Movement : MonoBehaviour {
     public LayerMask RoofLayer;
     public int speed;
     public int Camspeed;
-    public Transform wallTarget;
-    public Transform roofTarget;
-    static float t = 0.0f;
+    private Transform wallTarget;
+    private Transform roofTarget;
+    private float t = 1.0f;
+    private float materialAlpha;
 
 	void Update(){
         float x = Input.GetAxis("Horizontal") * speed;
@@ -39,14 +40,21 @@ public class Movement : MonoBehaviour {
 
         if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, RoofLength, RoofLayer))
         {
-            hit.transform.GetComponent<Renderer>().material.color = new Color (hit.transform.GetComponent<Renderer>().material.color.r,hit.transform.GetComponent<Renderer>().material.color.g,hit.transform.GetComponent<Renderer>().material.color.b, Mathf.Lerp(1.0f, 0.1f, t));
-            t += 0.8f * Time.deltaTime;
+            hit.transform.GetComponent<Renderer>().material.color = new Color (hit.transform.GetComponent<Renderer>().material.color.r,hit.transform.GetComponent<Renderer>().material.color.g,hit.transform.GetComponent<Renderer>().material.color.b, t);
+            if(t > 0.1f){
+                t -= 0.1f;
+            }
             roofTarget = hit.transform;
         } else {
             if(roofTarget != null){
-                roofTarget.GetComponent<Renderer>().material.color = new Color (roofTarget.GetComponent<Renderer>().material.color.r,roofTarget.GetComponent<Renderer>().material.color.g,roofTarget.GetComponent<Renderer>().material.color.b, Mathf.Lerp(0.1f, 1.0f, t));
-                t -= 0.8f * Time.deltaTime;
-                if(roofTarget.GetComponent<Renderer>().material.color.a >= 255.0f){
+                if(t < 1.0f){
+                    t += 0.1f;
+                }
+                materialAlpha = roofTarget.GetComponent<Renderer>().material.color.a;
+                roofTarget.GetComponent<Renderer>().material.color = new Color (roofTarget.GetComponent<Renderer>().material.color.r,roofTarget.GetComponent<Renderer>().material.color.g,roofTarget.GetComponent<Renderer>().material.color.b, t);
+                if(roofTarget.GetComponent<Renderer>().material.color.a >= 0.9999f){
+                    t = 1.0f;
+                    roofTarget.GetComponent<Renderer>().material.color = new Color (roofTarget.GetComponent<Renderer>().material.color.r,roofTarget.GetComponent<Renderer>().material.color.g,roofTarget.GetComponent<Renderer>().material.color.b, 1.0f);
                     roofTarget = null;
                 }
             }
